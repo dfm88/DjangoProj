@@ -52,3 +52,58 @@ def lead_create(request):
         "form": form
     }
     return render(request, "leads/lead_create.html", context)
+
+
+def lead_update(request, pk):
+    lead = Lead.objects.get(id=pk)
+    form = LeadModelForm(instance=lead)  # Pre populate the Form
+
+    # check if it'is a POST method
+    if request.method == 'POST':
+        # if we are POSTING, the instance parameter will
+        # make the form.save updating and not creating
+        # the instance in the DB
+        form = LeadModelForm(request.POST, instance=lead)
+        # validate the form
+        if form.is_valid():
+            form.save()
+            # redirect to Lead List
+            return redirect('/leads')
+
+    context = {
+        "form": form,
+        "lead": lead
+    }
+    return render(request, "leads/lead_update.html", context)
+
+
+""" def lead_update(request, pk):
+    lead = Lead.objects.get(id=pk)
+    form = LeadForm()
+    # check if it'is a POST method
+    if request.method == 'POST':
+        # validating and repopulate the Form
+        form = LeadForm(request.POST)
+        # validate the form
+        if form.is_valid():
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+            age = form.cleaned_data['age']
+            agent = Agent.objects.first()
+            # Save data in the form in the lead
+            lead.first_name = first_name
+            lead.last_name = last_name
+            lead.age = age
+            lead.agent = agent
+
+            # Update the DB value
+            lead.save()
+
+            # redirect to Lead List
+            return redirect('/leads')
+
+    context = {
+        "lead": lead,
+        "form": form
+    }
+    return render(request, "leads/lead_update.html", context) """
