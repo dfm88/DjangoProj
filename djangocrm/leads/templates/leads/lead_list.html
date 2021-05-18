@@ -21,11 +21,12 @@
     <h1>LEAD LIST</h1>
     {% for lead in leads %}
     <div class="lead">
-      <a href="{{ lead.id }}">{{lead.first_name}} {{lead.last_name}}</a>. Age:
+      <a href="{% url 'leads:lead-detail' lead.id %}">{{lead.first_name}} {{lead.last_name}}</a>. Age:
       {{lead.age}}
     </div>
+    </hr>
     {% endfor %}
   </body>
   <hr />
-  <a href="/leads/create/">Create a Lead</a>
+  <a href="{% url 'leads:lead-create' %}">Create a Lead</a>
 </html>

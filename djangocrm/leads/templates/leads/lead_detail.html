@@ -10,5 +10,8 @@
     <a href="/leads">Go back</a>
     <hr />
     <h4>LEAD DETAILS PAGE OF {{lead.first_name}} {{lead.last_name}}</h4>
+    <hr />
+    <a href="{% url 'leads:lead-update' lead.id %}"> Update </a>
+    <a href="{% url 'leads:lead-delete' lead.id %}"> Delete </a>
   </body>
 </html>
