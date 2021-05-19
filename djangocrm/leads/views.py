@@ -1,15 +1,45 @@
 from leads.models import Lead, Agent
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.http import HttpResponse
-from leads.form import LeadForm, LeadModelForm
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
+from leads.form import LeadForm, LeadModelForm, CustomUserCreationForm
+from django.core.mail import send_mail
+# from django.contrib.auth.forms import UserCreationForm
 
-# Create your views here.
+# CLASS Based Sign UP
+
+
+class SignupView(CreateView):
+    template_name = "registration/signup.html"
+    form_class = CustomUserCreationForm
+
+    def get_success_url(self):  # special method
+        # reverse = special key of django.shortcut to read the namespace from URL
+        return reverse("login")
+
+
+# CLASS Based Template
+class LandingPageView(TemplateView):
+    template_name = "landing.html"
+
+# FUNCTION Based Template
 
 
 def landing_page(request):
     return render(request, "landing.html")
 
+# CLASS Based List
+# NO context passed, it automaticallt takes it fomr model under "object_list" key
+# Or ita can be customized with "context_object_name" attribute
 
+
+class LeadListView(ListView):
+    template_name = "leads/lead_list.html"
+    queryset = Lead.objects.all()
+    context_object_name = "leads"
+
+
+# FUNCTION Based List
 def lead_list(request):
 
     leads = Lead.objects.all()
@@ -19,12 +49,41 @@ def lead_list(request):
     return render(request, "leads/lead_list.html", context)
 
 
+# CLASS Based Detail
+class LeadDetailView(DetailView):
+    template_name = "leads/lead_detail.html"
+    queryset = Lead.objects.all()
+    context_object_name = "lead"
+
+# FUNCTION Based Detail
+
+
 def lead_detail(request, pk):
     lead = Lead.objects.get(id=pk)
     context = {
         "lead": lead
     }
     return render(request, "leads/lead_detail.html", context)
+
+
+# CLASS Based Create
+class LeadCreateView(CreateView):
+    template_name = "leads/lead_create.html"
+    form_class = LeadModelForm
+
+    def get_success_url(self):  # special method
+        # reverse = special key of django.shortcut to read the namespace from URL
+        return reverse("leads:lead-list")
+
+    def form_valid(self, form):  # special method
+        nome = form.cleaned_data['first_name']
+        send_mail("User Created", f'the user {nome} was created', [
+                  'test@test.com'], ['testRec@test.com'])
+
+        return super(LeadCreateView, self).form_valid(form)
+
+
+# FUNCTION Based Create
 
 
 def lead_create(request):
@@ -38,24 +97,26 @@ def lead_create(request):
         # validate the form
         if form.is_valid():
             form.save()
-            # Controlli non necessari se si usa un Model Form,
-            # basta il metodo form.save()
-            """  print(form.cleaned_data)  # Print Cleaned Data
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            age = form.cleaned_data['age']
-            agent = form.cleaned_data['agent']
-            # Create the Lead into DB
-            Lead.objects.create(first_name=first_name,
-                                last_name=last_name, age=age,
-                                agent=agent) """
-            # redirect to Lead List
             return redirect('/leads')
 
     context = {
         "form": form
     }
     return render(request, "leads/lead_create.html", context)
+
+# CLASS Based Update
+
+
+class LeadUpdateView(UpdateView):
+    template_name = "leads/lead_update.html"
+    queryset = Lead.objects.all()
+    form_class = LeadModelForm
+
+    def get_success_url(self):  # special method
+        # reverse = special key of django.shortcut to read the namespace from URL
+        return reverse("leads:lead-list")
+
+# FUNCTION Based Update
 
 
 def lead_update(request, pk):
@@ -79,6 +140,9 @@ def lead_update(request, pk):
         "lead": lead
     }
     return render(request, "leads/lead_update.html", context)
+
+
+# FUNCTION Based Delete
 
 
 def lead_delete(request, pk):
