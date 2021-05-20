@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from leads.form import LeadForm, LeadModelForm, CustomUserCreationForm
 from django.core.mail import send_mail
+from django.contrib.auth.mixins import LoginRequiredMixin
 # from django.contrib.auth.forms import UserCreationForm
 
 # CLASS Based Sign UP
@@ -33,7 +34,7 @@ def landing_page(request):
 # Or ita can be customized with "context_object_name" attribute
 
 
-class LeadListView(ListView):
+class LeadListView(LoginRequiredMixin, ListView):
     template_name = "leads/lead_list.html"
     queryset = Lead.objects.all()
     context_object_name = "leads"
@@ -50,7 +51,7 @@ def lead_list(request):
 
 
 # CLASS Based Detail
-class LeadDetailView(DetailView):
+class LeadDetailView(LoginRequiredMixin, DetailView):
     template_name = "leads/lead_detail.html"
     queryset = Lead.objects.all()
     context_object_name = "lead"
@@ -67,7 +68,7 @@ def lead_detail(request, pk):
 
 
 # CLASS Based Create
-class LeadCreateView(CreateView):
+class LeadCreateView(LoginRequiredMixin, CreateView):
     template_name = "leads/lead_create.html"
     form_class = LeadModelForm
 
@@ -107,7 +108,7 @@ def lead_create(request):
 # CLASS Based Update
 
 
-class LeadUpdateView(UpdateView):
+class LeadUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "leads/lead_update.html"
     queryset = Lead.objects.all()
     form_class = LeadModelForm
@@ -140,6 +141,16 @@ def lead_update(request, pk):
         "lead": lead
     }
     return render(request, "leads/lead_update.html", context)
+
+
+# CLASS Based Delete
+
+class LeadDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = "leads/lead_delete.html"
+    queryset = Lead.objects.all()
+
+    def get_success_url(self):
+        return reverse("leads:lead-list")
 
 
 # FUNCTION Based Delete
